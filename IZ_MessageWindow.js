@@ -1,11 +1,12 @@
 //=============================================================================
-// IZ_MapSkill.js
+// IZ_MessageWindow.js
 // ----------------------------------------------------------------------------
-// Copyright (c) 2017 IZ
+// Copyright (c) 2018 IZ
 // This software is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
 // ----------------------------------------------------------------------------
 // Version
+// 1.0.0   2018/05/21  プラグインヘルプの改善
 // 0.1.0β 2017/10/22
 //=============================================================================
 
@@ -29,7 +30,8 @@
  * @default
  *
  * @param BustUpstUpPictureId
- * @desc バストアップ画像のピクチャ番号
+ * @desc バストアップ画像のピクチャ番号。PicturePriorityCustomize.js
+ * の"上層ピクチャ番号"より大きな数値を指定。
  * @default 100
  * @type number
  * @min 1
@@ -71,7 +73,8 @@
  * @default
  *
  * @param STPictureId
- * @desc 立ち絵画像のピクチャ番号
+ * @desc 立ち絵画像のピクチャ番号。PicturePriorityCustomize.js
+ * の"上層ピクチャ番号"より小さな数値を指定。
  * @default 100
  * @type number
  * @min 1
@@ -107,10 +110,10 @@
  * 　顔画像の代わりにバストアップや立ち絵画像も表示できる
  * 　メッセージウィンドウを実装します。
  * ・トリアコンタン様作成のPicturePriorityCustomize.jsと合わせて使用します。
- * ・バストアップ画像や立ち絵画像は通常のピクチャとして配置されます。
- * ・対応するバストアップ画像や立ち絵画像がない場合は通常の顔画像が表示されます。
  * ・顔画像の代わりに表示する画像には、「バストアップモード」と「立ち絵モード」の
  * 　２つのモードがあります。
+ * ・バストアップ画像や立ち絵画像は通常のピクチャとして配置されます。
+ * ・対応するバストアップ画像や立ち絵画像がない場合は通常の顔画像が表示されます。
  * ・モードはプラグインコマンドで切り替えることができます（下記使い方の６を参照）。
  * 
  * 〇「バストアップモード」
@@ -133,11 +136,15 @@
  * 
  * ★使用方法
  * 
- * １．トリアコンタン様作のPicturePriorityCustomize.jsをこのプラグインより
- * 　　上に配置してください。
+ * １．トリアコンタン様作のPicturePriorityCustomize.jsを有効にし、
+ * 　　各プラグインパラメータを設定して下さい。
+ * 　　※このとき、"上層ピクチャ番号"には100より小さな数値を、
+ * 　　　"下層ピクチャ番号"にはお好きな数値（ただし、これより大きな数値に
+ * 　　　通常ピクチャが割り振られるので小さめの数値がおススメ）を
+ * 　　　それぞれ設定してください。
  *
- * ２．＝＝サイトURL＝＝を参考に「エディタ表示用画像」と
- *　　「バストアップ用画像」・「立ち絵用画像」を作成してください。
+ * ２．「エディタ表示用画像」と
+ * 　　「バストアップ用画像」・「立ち絵用画像」を作成してください。
  *　　■エディタ表示用画像
  * 　　・エディタで画像を選ぶときに表示する画像。通常の顔画像と同じ画像規格。
  * 　　・ゲーム画面に表示される画像ではないので、適当なものでも大丈夫です。
@@ -165,8 +172,18 @@
  *
  * ３．バストアップ用画像はimg/picturesに、
  * 　　エディタ表示用画像はimg/facesにそれぞれ保存してください。
+ * 　　※バストアップか立ち絵のどちらか一方しか使わない場合も、
+ * 　　　必ずプラグインパラメータ設定画面を開き、
+ * 　　　"BustUpFiles"と"STFiles"のどちらも空白でないことを
+ * 　　　確認してください。
+ * 　　（空欄だと正常に動作しません。何もファイルを指定しない場合、
+ * 　　　プラグインパラメータには [] (カギ括弧両とじのみ)を設定してください）
  *
- * ４．プラグインパラメータを登録していきます（たくさんあります）。
+ * ４．その他のプラグインパラメータを登録していきます（たくさんあります）。
+ * 　　※ "BustUpPictureId"には PicturePriorityCustomize.jsの"上層ピクチャ番号"
+ * 　　　よりも小さな数値を、
+ * 　　　 "STPictureId"には、"上層ピクチャ番号"よりも小さな数値を
+ * 　　　それぞれ指定してください。
  *
  * ５．★準備お疲れ様です！★
  * 　　ここまで設定したらあとはエディタではいつも通り顔画像を指定していくだけです。
@@ -205,12 +222,10 @@
 
     //バストアップ用
     var BustUpPictureId = parseInt(parameters['BustUpPictureId'])||100;
-    
     var BustUpWidth = toNumber(parameters['BustUpWidth'], 200);
     var BustUpHeight = toNumber(parameters['BustUpHeight'], 250);
     var BustUpPosX = toNumber(parameters['BustUpPosX'], 10);
     var BustUpPosY = toNumber(parameters['BustUpPosY'], 0);
-
     var buf = PluginManager.parameters(pluginName)['BustUpFiles'];
     var BustUpFiles = JSON.parse(buf);
 
@@ -222,7 +237,7 @@
     var STFiles = JSON.parse(stf);
 	var STZoom = toNumber(parameters['STZoom'], 1);
 
-    //■バストアップモード・立ち絵モード管理変数
+    //バストアップモード・立ち絵モード管理変数
     var mode = toNumber(parameters['DefaultPictureMode'], 0);
 
     //■モード切替（プラグインコマンド）
