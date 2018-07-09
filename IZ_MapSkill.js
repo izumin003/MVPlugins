@@ -5,10 +5,11 @@
 // This software is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
 // ----------------------------------------------------------------------------
-// Version 0.1.5β 2018/3/9
+// Version 0.1.6β 2019/7/9
 // 
 //
 // ■更新履歴
+// 0.1.6β 2018/7/9 　・記述ミスによる不具合修正。
 // 0.1.5β 2018/3/9   ・操作方法ヘルプの文章をパラメータで設定できるように変更。
 // 0.1.4β 2018/2/24  ・職業で立ち絵を変更しようとすると出るエラーを修正。
 // 0.1.3β 2017/11/17 ・ヘルプ画面に表示される文字列の形式を指定する設定を追加。
@@ -946,7 +947,7 @@
             helpText.replace(/\n/, /\\n/);
             var descs = item.description ? item.description.split(/\n|\\n/) : []; 
 
-            for (i = 0; i < descs.length; i++) {
+            for (var i = 0; i < descs.length; i++) {
                 if (descs[i] == "\\n") {
                     descs.splice(i, 1);
                 }
